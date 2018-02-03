@@ -1,4 +1,5 @@
-![s](http://math.huji.ac.il/~workshop2017/huji2.jpg)
+![s](http://math.huji.ac.il/~workshop2017/huji2.jpg) . 
+
 [The Department of Statistics](http://new.huji.ac.il/en)
 
 # **Welcome to Data Analysis with R**
