@@ -2,8 +2,8 @@
 [The Department of Statistics](http://new.huji.ac.il/en)
 
 # **Welcome to Data Analysis with R**
-
-This course is currently still in development and is based on [this course](https://github.com/datasciencelabs/2017). 
+52414
+This course is currently still in development and is based on [this course](https://github.com/datasciencelabs/2017) and [this course](http://www.john-ros.com/Rcourse/). 
 
 
 License
