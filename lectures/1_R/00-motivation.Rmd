@@ -1,0 +1,111 @@
+# A Short Primer on R  
+The programming language of this course is the 
+[R software environment](https://cran.r-project.org/)  
+
+![](https://qph.ec.quoracdn.net/main-qimg-0d7f42b396267c595798758e12fb5dfb "R language")  
+  
+
+
+
+#### Why R? Pros:
+* R's strong package ecosystem (libraries) 
+* Out of the box native Graphical benefits
+* R’s close ties to the academia (R's community) 
+* Best suited for people that have data-oriented problems they're trying to solve
+* Interactive language: high-level and intuitive 
+* Data structures primitives for data analysis
+* R is free!
+* Excellent documentation
+
+
+#### Why not R? Cons:
+* R's shortcomings in speed, security and memory management
+* R emanates from programming languages built in the 1960s by Bell labs, somewhat outdated today
+* Not a deployment language  
+
+However, many of R's packages (libraries) are written in fast and efficient languages (such as in C, C++)  
+
+
+### R Ecosystem
+* CRAN: a repository for R packages, mirrored worldwide.  
+* R-help: StackExchange, StackOverflow and CrossValidated sites
+* Bioconductor: A CRAN-like repository dedicated to the life sciences.
+* Neuroconductor: A CRAN-like repository dedicated to neuroscience, and neuroimaging.
+* Books: Many academic books are written in R. 
+* The [Israeli-R-user-group](https://groups.google.com/forum/#!forum/israel-r-user-group) 
+* RStudio: Written in JavaScript, the RStudio IDE is the most popular and powerful IDE for R.
+
+  
+  
+#### R Topics (non-exhaustive)  
+  
+3.1 File types
+3.2 Simple calculator
+3.3 Probability calculator
+3.4 Getting Help
+3.5 Variable Asignment
+3.6 Missing
+3.7 Piping
+3.8 Vector Creation and Manipulation
+3.9 Search Paths and Packages
+3.10 Simple Plotting
+3.11 Object Types
+3.12 Data Frames
+3.13 Exctraction
+3.14 Non data.frame object classes
+3.15 Data Import and Export
+3.16 Functions
+3.17 Looping
+3.18 Apply
+3.19 Recursion
+3.20 Dates and Times  
+  
+basics  
+5.1 Objects
+5.2 The workspace
+5.3 Functions
+5.4 Other prebuilt objects
+5.5 Variable names
+5.6 Saving your workspace
+5.7 Scripts  
+  
+
+data types
+6.1 Data frames
+6.2 Examining an object
+6.3 The accessor
+6.4 Vectors: numerics, characters, and logical
+6.5 Factors
+6.6 Lists  
+
+vectors  
+7.1 Creating vectors
+7.2 Names
+7.3 Sequences
+7.4 Subsetting
+7.5 Coercion
+7.6 Not Availables (NA)  
+
+sorting
+8.1 sort
+8.2 order
+8.3 max and which.max
+8.4 rank
+8.5 Beware of recycling  
+
+vector arithmatics
+9.1 Rescaling
+9.2 Two vectors  
+
+indexing
+10.1 Subsetting with logicals
+10.2 Logical operators
+10.3 which
+10.4 match
+10.5 %in%  
+
+
+
+## Example...
+
+
