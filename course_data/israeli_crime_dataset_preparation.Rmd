@@ -1,0 +1,31 @@
+---
+title: "Israeli Crime Dataset Preparation"
+author: "Lee_Carlin"
+date: "3/20/2018"
+output: html_document
+---
+
+Our first step is to load the different datasets:
+```{r loading data}
+# Please change the paths as needed
+library(readr)
+# Loading crime data for years 2011-13:
+df.crime <- read_csv("/Users/lee/Dropbox (Personal)/School/52414/2017 Course Git/DataAnalysisR/course_data/israel_crime_list_11_to_13_english.csv")
+# Loading town english names:
+df.names <- read_csv("/Users/lee/Dropbox (Personal)/School/52414/2017 Course Git/DataAnalysisR/course_data/israeli_towns_names_and_numbers.csv")
+#loading murder data for town type:
+df.murder <- read_csv("/Users/lee/Dropbox (Personal)/School/52414/2017 Course Git/DataAnalysisR/course_data/israel_murder_05_09_english.csv")
+# loading population data:
+df.population <- read_csv("/Users/lee/Dropbox (Personal)/School/52414/2017 Course Git/DataAnalysisR/course_data/israel_population.csv")
+```
+Once the different datasets are loaded, we can join the necessary fields to the crime data:
+```{r joining columns}
+#joining the English town names to the crime data:
+library("plyr")
+df.crime.full <- join(df.crime, df.names, by = c("town_number"), type = "left", match = "all")
+#joining the total population size per town to the crime data:
+df.crime.full <- join(df.crime.full, df.population[c('town_number','total')], by = c("town_number"), type = "left", match = "all")
+#joining the town type to the crime data:
+df.crime.full <- join(df.crime.full, df.murder[c('town_h','town_type')], by = c("town_h"), type = "left", match = "all")
+```
+
