@@ -43,4 +43,3 @@ Saving dataset to file:
 ```{r}
 write.csv(df.crime.short,"/Users/lee/Dropbox (Personal)/School/52414/2017 Course Git/DataAnalysisR/course_data/israeli_crime_2011_short.csv", row.names=FALSE )
 ```
-
