@@ -24,8 +24,22 @@ Once the different datasets are loaded, we can join the necessary fields to the 
 library("plyr")
 df.crime.full <- join(df.crime, df.names, by = c("town_number"), type = "left", match = "all")
 #joining the total population size per town to the crime data:
-df.crime.full <- join(df.crime.full, df.population[c('town_number','total')], by = c("town_number"), type = "left", match = "all")
+df.crime.full <- join(df.crime.full, df.population[c('town_number','total','region')], by = c("town_number"), type = "left", match = "all")
 #joining the town type to the crime data:
 df.crime.full <- join(df.crime.full, df.murder[c('town_h','town_type')], by = c("town_h"), type = "left", match = "all")
 ```
-
+preparing dataset for first class:
+```{r}
+#Choosing the appropriate columns:
+df.crime.short <- df.crime.full[,c("town","region","year","assults","total")]
+#Filtering by 2011:
+df.crime.short <- df.crime.short[which(df.crime.short$year==2011),]
+#Sorting population total by decreasing order:
+df.crime.short <- df.crime.short[order(-df.crime.short$total),] 
+#Keeping only the top 50:
+df.crime.short <- df.crime.short[1:50,]
+```
+Saving dataset to file:
+```{r}
+write.csv(df.crime.short,"/Users/lee/Dropbox (Personal)/School/52414/2017 Course Git/DataAnalysisR/course_data/israeli_crime_2011_short.csv", row.names=FALSE )
+```
