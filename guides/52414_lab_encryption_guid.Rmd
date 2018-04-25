@@ -35,4 +35,4 @@ cyphr::encrypt_file(rmd.path.name.input, public.key ,rmd.path.name.output)
 ```
 
 Last step: Upload your encypted RMD file to github in the following link:
-`https://github.com/DataScienceHU/DataAnalysisR/tree/master/Lab1`
+`https://github.com/DataScienceHU/DataAnalysisR/tree/master/Lab1/Lab1_submissions/`
