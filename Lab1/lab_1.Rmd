@@ -18,7 +18,7 @@ Instructions:
 3. Please avoid plagiarism - do not share your answers with other groups.  
 4. Use the encryption guide (see moodle) to encrypt your final rmd file and name it `Lab1_group#_crypt`   
 5. Upload the encrypted file to the following link:  
-** `https://github.com/DataScienceHU/DataAnalysisR/tree/master/Lab1``
+** `https://github.com/DataScienceHU/DataAnalysisR/tree/master/Lab1/Lab1_submissions/``
 
 Required libraries:
 ```{r, echo=FALSE}
