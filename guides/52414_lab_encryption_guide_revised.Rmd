@@ -22,15 +22,14 @@ Go to [Public_Key](https://github.com/DataScienceHU/DataAnalysisR/blob/master/gu
 
 ```{r}
 path.to.public.key <- "fill in your path to downloaded public key here"
-path.to.public.key <- "~/Dropbox (Personal)/School/52414/Lectures_2018/course_data/pub_cyphr_52414"
 load(path.to.public.key) #loading the downloaded public key into R
 ```
 
 
 Encrypt your lab rmd file:
 ```{r}
-rmd.path.name.input <- "~/Dropbox (Personal)/School/52414/testing_encryption.Rmd"
-rmd.path.name.output <- "~/Dropbox (Personal)/School/52414/testing_encryption_ENCYPTED"
+rmd.path.name.input <- "fill in your path to rmd file  you want to encrypt"
+rmd.path.name.output <- "fill in the path to the wanted encrypted ouput name"
 cyphr::encrypt_file(rmd.path.name.input, pub_cyphr , rmd.path.name.output)
 ```
 
