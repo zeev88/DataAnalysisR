@@ -1,0 +1,47 @@
+---
+title: "52414 Lab Encryption Guide Revised"
+author: "52414"
+date: "5/09/2018"
+output: html_document
+---
+A short guide on file encryption using public key and `sodium`  
+
+First we need to install/load the necessary Libraries:  
+Sodium is in CRan, while the wrapper cypher must be installed from github
+```{r}
+library("sodium")
+library("cyphr")
+library("repmis")
+# To install cypher:
+# remotes::install_github("ropensci/cyphr", upgrade = FALSE)
+```
+
+
+Loading the key object from github:
+```{r}
+source_data("https://github.com/DataScienceHU/DataAnalysisR/blob/master/guides/public_key_52414.RData?raw=True")
+```
+
+
+Loading the key object from github:
+```{r}
+load("~/Dropbox (Personal)/School/52414/Lectures_2018/course_data/pkey_52414.RData")
+public.key <- cyphr::keypair_sodium(key = pub, pub = pub)
+```
+
+
+
+Encrypt your lab rmd file:
+```{r}
+rmd.path.name.input <- "~/Dropbox (Personal)/School/52414/Lectures_2018/course_data/52414_lab_encryption_guid.Rmd"
+rmd.path.name.output <- "~/Dropbox (Personal)/School/52414/Lectures_2018/course_data/52414_lab_encryption_guid_ENCYPTED"
+cyphr::encrypt_file(rmd.path.name.input, public.key ,rmd.path.name.output)
+```
+
+# Upload your encypted RMD file to github:
+
+```{r}
+privateKey <- cyphr::keypair_sodium(key = as.raw(private.key$key), pub = as.raw(private.key$pub))
+cyphr::decrypt_file(rmd.path.name.output, privateKey ,"~/Dropbox (Personal)/School/52414/Lectures_2018/course_data/52414_lab_encryption_guid_ENCYPTED_decrypted")
+```
+
