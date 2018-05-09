@@ -7,7 +7,7 @@
 52414
 
 This course is currently still in development. 
-
+Have fun!
 
 License
 ----
