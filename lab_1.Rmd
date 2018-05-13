@@ -1,0 +1,164 @@
+---
+title: "Lab 1 Solutions"
+author: '52414'
+date: "4/21/2018"
+output: html_document
+---
+
+GROUP Number: ____fill-in____
+Name of 1st group member: ____AVI DORI____
+Email of 1st group member: ____avi.dori@mail.huji.ac.il____
+Name of 2st group member: ____fill-in____
+Email of 2st group member: ____fill-in____
+
+Instructions:    
+1. Please rename your group lab_1 rmd file as - `Lab1_group#.rmd`.   
+** The # should be replaced by your group number.  
+2. Fill in your code in the relevant code execution boxes.  
+3. Please avoid plagiarism - do not share your answers with other groups.  
+4. Use the encryption guide (see moodle) to encrypt your final rmd file and name it `Lab1_group#_crypt`   
+5. Upload the encrypted file to the following link:  
+** `https://github.com/DataScienceHU/DataAnalysisR/tree/master/Lab1/Lab1_submission/``
+
+Required libraries:
+```{r, echo=FALSE}
+library(dplyr)
+library(ggplot2)
+library(tictoc)
+```
+ 
+A friend wants to visit Israel, but heard things might be violent. 
+You want to inform him that Israel's streets are actually pretty safeג€¦ but - maybe there are some towns your friend shouldnג€™t visit. 
+Fortunately, you have access to some data that with a bit of wrangling can help you and your friends make better informed decisions. 
+
+First, load the `israel_crime_full_lab1` and `lab1.map` datasets:  
+    
+    Solution:
+```{r}
+# Your code here
+# Load datasets here
+crimes.full <- # load israel_crime_full_lab1 here
+lab1.map <- # load lab1.map here
+lab1.map <-read.csv("C:/לימודים/52414 ניתוח נתונים עם R/LAB1/lab1_map (1).csv")
+crimes.full <- read.csv("C:/לימודים/52414 ניתוח נתונים עם R/LAB1/israel_crime_full_lab1")
+
+
+
+0. Due to some bamboozlement, `crimes.full` is missing the `town` column. Create a script that adds a `town` column to our data by pairing each `town_number` in `crimes.full` with its `town` counterpart using `lab1.map`. In addition, use the `r-base` function `join` (or merge) to achieve the same thing. Which one is faster? Why does it matter? Use the web to find out what is the difference between `right`,`left`,`inner`, and `anti` join. 
+Use the library `tictoc` and the methods `tic()` and `toc()` to time both processes.   
+
+*The tictoc package provides the very useful timing functions 'tic' and 'toc'. You can record the time it takes for R (and your computer) to process a simple or complex script before it is running using tic(), and examine the computation time at the end using toc().*
+
+    Solution:
+```{r}
+# Your code here
+#1
+newcrimes.full <- mutate(crimes.full,lab1.map$town)
+names(newcrimes.full)[13] <- "town"
+#2
+tab <- left_join(lab1.map, crimes.full,"town_number")
+
+# יותר מהיר function `join`
+# כאשר כמות הנתונים גדולה מאוד המהירות חשובה
+# inner: only rows with matching keys in both x and y
+#left: all rows in x, adding matching columns from y
+#right: all rows in y, adding matching columns from x
+#full: all rows in x with matching columns in y, then the rows of y that don't match x
+
+#time1:0.02 sec
+tic()
+newcrimes.full <- mutate(crimes.full,lab1.map$town)
+names(newcrimes.full)[13] <- "town"
+toc()
+#time2:0 sec
+tic()
+tab <- left_join(lab1.map, crimes.full,"town_number")
+toc()
+1. Create a new variable - `total_assaults`, the sum of `assaults`,`robberies`, and `sexual_assault`. Also, calculate the `total_assaults_rate` per 10,000 people for each town, and add those variables to the table. Which town has the largest total_assaults in 2013? Which has the largest total_assault_rate in 2013?  
+
+    Solution:
+```{r}
+# Your code here
+tab$total_assaults <- (tab$assaults+tab$sexual_assault+tab$robberies)
+tab$total_assaults_rate <- (10000*tab$total_assaults)/(tab$population)
+tab %>% 
+  filter(year==2013) %>%
+  arrange(desc(total_assaults)) %>% 
+  head()
+tab %>% 
+  filter(year==2013) %>%
+  arrange(desc(total_assaults_rate)) %>% 
+  head()
+#largest total_assaults in 2013 = JERUSALEM
+#largest total_assault_rate in 2013 = ELAT
+
+
+2. Jerusalem is the city with the most total assaults. However, this does not necessarily make Jerusalem the most dangerous town (as you've seen above). Create a plot that shows the correlation between the number of total assaults to the towns' population. 
+  
+    Solution:
+```{r}
+# Your code here
+#option1    
+plot(tab$total_assaults,tab$population,pch=0.5,col="green",ylab= "population", xlab = "total assaults",main="crime data: total assaults vs. population")
+abline(lm(data = tab, population ~ total_assaults))
+#option2
+tab %>% ggplot() + geom_point(aes(x = total_assaults,y = population))
+geom_abline(intercept = log10(reg_line))
+
+
+3. Describe graphically the distribution of the total assault rates across towns in 2013:  
+a. How similar are towns?   (show graphically and explain verbally)
+b. How much do total assault rates vary by region? (show graphically and explain verbally)
+  
+    Solution:
+```{r}
+# Your code here
+tab2013 <- tab[tab$year == "2013",]
+hist(tab2013$total_assaults_rate, prob=TRUE, ylim =c(0, 0.02))
+#or using ggplot
+#option1 
+tab2013 %>% ggplot() + geom_histogram(aes(x = tab2013$total_assaults_rate),binwidth = 5)
+#option2
+tab2013 %>% ggplot() + geom_freqpoly(aes(x = tab2013$total_assaults_rate),binwidth = 5)+labs(x='total_assaults_rate',y='frequency')
+#option3
+tab2013 %>% ggplot() + geom_density(aes(x = tab2013$total_assaults_rate))
+#a.נראה כי הערים דומות יחסית ברמת הפשיעה וכי רוב הערים נמצאות בטווח של 0עד 70,ההתפלגות דומה להתפלגות לוג נורמלי
+boxplot(tab2013$total_assaults_rate~tab2013$region,pch=18, xlab='region', ylab='total assaults rate', main='Assaults rate by region')
+#or using ggplot
+tab2013 %>% ggplot() + geom_boxplot(aes(tab2013$region,tab2013$total_assaults_rate))
+#b.ניתן לראות כי השונות ברמת הפשיעה לפי אזורים אינה רבה באופן כללי אך ישנם אזורים אשר רמת הפשיעה בהם גבוהה 
+4. Should your friend be worried coming over next year? Check the changes in the distribution of the total assault rates across towns over the years. Plot a histogram of the total assault rate across towns over the different years. Is there an increase in crime? Make sure to pick binwidths that result in informative plots.
+  
+    Solution:
+```{r}
+# Your code here
+tab %>% ggplot() + geom_histogram(aes(x = tab$total_assaults_rate),binwidth = 4) +facet_grid(.~year)
+#.נראה כי אין עליה ברמת הפשיעה לאורך השנים אלה ירידה ברמת הפשיעה הגבוהה(100 ומעלה)לאורך השנים
+
+
+5. Another way to see the distributional change by year is via a heatmap plot. One problem with the plot above is that we can't distinguish towns from each other. We have three variables to show: year, town and rate. If we use the two dimensions to show year and town then we need something other than vertical or horizontal position to show the rates. Try using color. 
+To make the visualization easier, filter the data to include only towns with population >= 87000. 
+Use the following `ggplot1` blueprint to create the heatmap:
+```{}
+ggplot(aes(x = ?, y = ?,  fill = ?)) +
+    geom_tile(color = "grey50") +
+    scale_x_discrete(expand = c(0,0)) +
+    scale_fill_gradientn("Cases per\n10,000", 
+                         colors = brewer.pal(9, "Reds"))
+    theme_minimal() +  
+    theme(panel.grid = element_blank()) +
+    ggtitle("Total Assault Rate per 10,000 by Town") + 
+    ylab("") + xlab("")
+```
+    
+    Solution:
+```{r}
+# Your code here
+```
+
+
+6. Summarize your findings. Do you think it matters what town your friend should visit? Are there any towns you think they should skip? 
+
+    Solution:
+# כמו הרבה מדינות בעולם גם בישראל ישנם ישובים ואזורים עם רמת פשיעה גבוהה יותר מאזורים אחרים. גם בישראל ישנה שונות בין האזורים אך היא אינה גבוהה במיוחד, כמו כן לא ניתן בצורה מובהקת לקבוע האם העיר הגדולה בטוחה יותר מהכפר או עירת הפיתוח ולהפך,אילת וג'סר א זרקא עם רמת פשיעה הכי גבוהה בישראל. בנוסף אין הבדל גדול בין הצפון לדרום .(במרכז רמת הפשיעה ביחס לאוכ' נמוך במעט)
+# לסיכום רמת הפשיעה בישראל יורדת עם הזמן ואין המלצה מלבקר בישוב מסויים
