@@ -1,0 +1,220 @@
+---
+title: "Lab 1 Solutions"
+author: '52414'
+date: "4/21/2018"
+output: html_document
+---
+
+GROUP Number: 2 <br />
+Name of 1st group member: Gioia Blayer <br />
+Email of 1st group member: gioia.blayer@gmail.com <br />
+Name of 2st group member: Sapir Chen Zion <br />
+Email of 2st group member: sapir.levy1@mail.huji.ac.il <br />
+
+
+```{r echo=FALSE, message=FALSE, warning=FALSE, paged.print=FALSE}
+
+#Required libraries:
+library(dplyr)
+library(ggplot2)
+library(tictoc)
+```
+ 
+A friend wants to visit Israel, but heard things might be violent. 
+You want to inform him that Israel's streets are actually pretty safe? but - maybe there are some towns your friend shouldn't visit. 
+Fortunately, you have access to some data that with a bit of wrangling can help you and your friends make better informed decisions. 
+
+First, load the `israel_crime_full_lab1` and `lab1.map` datasets:  
+    
+    Solution:
+```{}
+# Your code here
+# Load datasets here
+crimes.full <- read.csv("~/Hebrew University/Materie Curricolari/Second Year/Statistica/Semester B/Data Analysis with R/Labs/israel_crime_full_lab1.csv")
+
+lab1.map <- read.csv("~/Hebrew University/Materie Curricolari/Second Year/Statistica/Semester B/Data Analysis with R/Labs/lab1_map.csv")
+```
+```{r}
+crimes.full.name <- "~/Dropbox (Personal)/School/52414/Lectures_2018/course_data/israeli_crime/israel_crime_full_lab1"
+lab1.map.name <- "~/Dropbox (Personal)/School/52414/Lectures_2018/course_data/israeli_crime/lab1_map.csv"
+crimes.full <- read.csv(crimes.full.name, stringsAsFactors = FALSE)
+lab1.map <- read.csv(lab1.map.name, stringsAsFactors = FALSE)
+```
+
+
+0. Due to some bamboozlement, `crimes.full` is missing the `town` column. Create a script that adds a `town` column to our data by pairing each `town_number` in `crimes.full` with its `town` counterpart using `lab1.map`. In addition, use the `r-base` function `join` (or merge) to achieve the same thing. Which one is faster? Why does it matter? Use the web to find out what is the difference between `right`,`left`,`inner`, and `anti` join. 
+Use the library `tictoc` and the methods `tic()` and `toc()` to time both processes.   
+
+*The tictoc package provides the very useful timing functions 'tic' and 'toc'. You can record the time it takes for R (and your computer) to process a simple or complex script before it is running using tic(), and examine the computation time at the end using toc().*
+
+    Solution:
+```{r}
+lab1.map <- lab1.map[match(x=unique(lab1.map$town_number),
+                           table=lab1.map$town_number),]
+#test assumption: all town numbers in crimes.full are also in lab1.map
+#all(order(unique(crimes.full$town_number))==order(lab1.map$town_number))
+
+tic()
+crimes.full$town_name <- NA
+for (i in 1:nrow(crimes.full)) {
+  match.place <- which(lab1.map$town_number == crimes.full$town_number[i])
+     crimes.full$town_name[i] <- as.character(lab1.map$town[match.place])
+}
+toc()
+```
+
+The merge function is faster mainly because it works vectorly while ours runs with a loop.In a big data set, the amount of observations affects the time a code runs.  
+
+```{r}
+tic()
+crimes.full <- merge(x=crimes.full,y=lab1.map, by="town_number",all.x = TRUE)
+toc()
+
+#test for ourselves
+#all(crimes.full$town_name==crimes.full$town)
+```
+
+We built the same function vectorly to accelerate the run time.
+```{r}
+tic()
+crimes.full$town_name_2 <- lab1.map$town[match(crimes.full$town_number,lab1.map$town_number)]
+toc()
+
+crimes.full <- subset(crimes.full,select = -c(town_name,town_name_2))
+```
+
+1. Create a new variable - `total_assaults`, the sum of `assaults`,`robberies`, and `sexual_assault`. Also, calculate the `total_assaults_rate` per 10,000 people for each town, and add those variables to the table. Which town has the largest total_assaults in 2013? Which has the largest total_assault_rate in 2013?  
+
+    Solution:
+```{r}
+crimes.full$total_assaults <- (crimes.full$assaults + crimes.full$robberies + crimes.full$sexual_assault)
+crimes.full$total_assaults_rate <- crimes.full$total_assaults*10000/(crimes.full$population)
+
+#largest total_assaults in 2013
+crimes.full[which(crimes.full$total_assaults == max(crimes.full$total_assaults[crimes.full$year=="2013"])),c("town","total_assaults")]
+
+#largest total_assaults_rate in 2013
+crimes.full[which(crimes.full$total_assaults_rate == max(crimes.full$total_assaults_rate[crimes.full$year=="2013"])),c("town","total_assaults_rate")]
+
+```   
+
+
+2. Jerusalem is the city with the most total assaults. However, this does not necessarily make Jerusalem the most dangerous town (as you've seen above). Create a plot that shows the correlation between the number of total assaults to the towns' population. 
+  
+    Solution:
+```{r fig.height=10, fig.width=17, message=FALSE, warning=FALSE, paged.print=FALSE}
+
+options(scipen=999)
+ggplot(crimes.full,aes(x=population,y=total_assaults))+
+  geom_point()+
+  xlim(0,350000)+
+  ylim(0,3000)+
+  ylab("total assaults")+
+  geom_smooth(method = "lm")+
+   theme(text = element_text(size=25),
+        axis.text.x = element_text(angle=0, hjust=1))
+
+```
+
+We decided to remove the abnormal observations to better infer the correlation between the variables. 
+
+3. Describe graphically the distribution of the total assault rates across towns in 2013:  
+a. How similar are towns?(show graphically and explain verbally)
+**similar in what way??**
+b. How much do total assault rates vary by region? (show graphically and explain verbally)
+  
+    Solution:
+```{r fig.height=10, fig.width=17, message=FALSE, warning=FALSE, paged.print=FALSE}
+#a
+means <- mean(crimes.full$total_assaults_rate[crimes.full$year==2013])
+sds <- sd(crimes.full$total_assaults_rate[crimes.full$year==2013])
+
+ggplot(subset(crimes.full,year=="2013"),aes(total_assaults_rate))+
+  geom_histogram(bins = 30,fill="darkcyan",color="dimgrey",size=1)+
+geom_freqpoly(binwidth = 7,size=1,color="deepskyblue4")+
+xlab("Total Assaults Rate")+
+ylab("Town amiunt per Assaults Rate")+
+geom_vline(xintercept = means,color="darkslategrey",size=2)+
+geom_vline(xintercept = means+2*sds,color="darkslategrey")+
+geom_vline(xintercept = means-2*sds,color="darkslategrey")
+```
+```{}
+x and y labels are very difficult to read. 
+```
+
+a. If we look at the histogram, we can assume that because of the high variance of the observations, the cities seem to be different from each other. In addition, the graph presents a right tail which influences the distribution (and variance) of the data.
+
+```{r fig.height=10, fig.width=17, message=FALSE, warning=FALSE, paged.print=FALSE}
+#b
+
+ggplot(subset(crimes.full,year=="2013"),aes(y=total_assaults_rate,x=region,color=region))+
+  geom_boxplot()+
+  theme(legend.position = "none",text = element_text(size=25),
+        axis.text.x = element_text(angle=45, hjust=1))
+```
+b. 
+
+
+
+4. Should your friend be worried coming over next year? Check the changes in the distribution of the total assault rates across towns over the years. Plot a histogram of the total assault rate across towns over the different years. Is there an increase in crime? Make sure to pick binwidths that result in informative plots.
+  
+    Solution:
+```{r fig.height=10, fig.width=17, message=FALSE, warning=FALSE, paged.print=FALSE}
+
+means.11 <- mean(crimes.full$total_assaults_rate[crimes.full$year==2011])
+means.12 <- mean(crimes.full$total_assaults_rate[crimes.full$year==2012])
+means.13 <- mean(crimes.full$total_assaults_rate[crimes.full$year==2013])
+
+
+
+ggplot(crimes.full,aes(total_assaults_rate,color=factor(year),
+                       fill=factor(year),group=factor(year)))+
+  geom_density(alpha=0.15)+
+  xlab("total assault rate")+
+  ylab("amount of towns per assault rate")+
+  geom_vline(xintercept = means.11,col="red")+
+  geom_vline(xintercept = means.12,col="green")+
+  geom_vline(xintercept = means.13,col="blue")
+
+
+```
+
+From the graph, we can see that the mean of total assaults' rate slightly increased over the years. However, the distributions of the assaults' rates are quite close to one another, so we should have a similar amount of assaults in 2014 as well.  
+
+
+5. Another way to see the distributional change by year is via a heatmap plot. One problem with the plot above is that we can't distinguish towns from each other. We have three variables to show: year, town and rate. If we use the two dimensions to show year and town then we need something other than vertical or horizontal position to show the rates. Try using color. 
+To make the visualization easier, filter the data to include only towns with population >= 87000. 
+Use the following `ggplot1` blueprint to create the heatmap:
+```{}
+ggplot(aes(x = ?, y = ?,  fill = ?)) +
+    geom_tile(color = "grey50") +
+    scale_x_discrete(expand = c(0,0)) +
+    scale_fill_gradientn("Cases per\n10,000", 
+                         colors = brewer.pal(9, "Reds"))
+    theme_minimal() +  
+    theme(panel.grid = element_blank()) +
+    ggtitle("Total Assault Rate per 10,000 by Town") + 
+    ylab("") + xlab("")
+```
+    
+    Solution:
+```{r message=FALSE, warning=FALSE, paged.print=FALSE}
+library(RColorBrewer)
+ggplot(subset(crimes.full,population >= 87000),aes(x = year, y = town,  fill = total_assaults_rate)) +
+    geom_tile(color = "grey50") +
+    scale_x_discrete(expand = c(0,0)) +
+    scale_fill_gradientn("Cases per\n10,000", 
+                         colors = brewer.pal(9, "Reds"))+
+    theme_minimal() +  
+    theme(panel.grid = element_blank()) +
+    ggtitle("Total Assault Rate per 10,000 by Town") + 
+    ylab("") + xlab("")
+```
+**ADD THE YEARS TO THE GRAPH ABOVE**
+
+6. Summarize your findings. Do you think it matters what town your friend should visit? Are there any towns you think they should skip? 
+
+
+    Solution:
+Although it seems dangerous, visiting Israel is still worth it. But it would be better to avoid certain areas like Be'er Sheva or Tel Aviv. Instead, visiting Modi'in or Bnei Brak should be safer. Since those areas are less touristic, we recommend visiting Jerusalem or Herzlia, where the amount of attacks are relatively low, but still not negligible. 
+In addition, we should notify that the increase of assaults over the years is not that significant,i.e., we won't have a huge hike in assaults'rate from 2013 to 2014.  
