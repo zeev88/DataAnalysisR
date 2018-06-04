@@ -1,0 +1,229 @@
+---
+title: "Lab 1 Solutions"
+author: '52414'
+date: "4/21/2018"
+output: html_document
+---
+
+GROUP Number: 7
+Name of 1st group member: mor slomi
+Email of 1st group member: mor.slomi@mail.huji.ac.il
+Name of 2st group member: aviv lasry
+Email of 2st group member: aviv.lasry@mail.huji.ac.il
+
+Instructions:    
+1. Please rename your group lab_1 rmd file as - `Lab1_group#.rmd`.   
+** The # should be replaced by your group number.  
+2. Fill in your code in the relevant code execution boxes.  
+3. Please avoid plagiarism - do not share your answers with other groups.  
+4. Use the encryption guide (see moodle) to encrypt your final rmd file and name it `Lab1_group#_crypt`   
+5. Upload the encrypted file to the following link:  
+** `https://github.com/DataScienceHU/DataAnalysisR/tree/master/Lab1/Lab1_submission/``
+
+Required libraries:
+```{r, echo=FALSE}
+library(dplyr)
+library(ggplot2)
+library(tictoc)
+```
+ 
+A friend wants to visit Israel, but heard things might be violent. 
+You want to inform him that Israel's streets are actually pretty safe… but - maybe there are some towns your friend shouldn’t visit. 
+Fortunately, you have access to some data that with a bit of wrangling can help you and your friends make better informed decisions. 
+
+First, load the `israel_crime_full_lab1` and `lab1.map` datasets:  
+    
+    Solution:
+```{}
+
+crimes.full <- read.csv("C:/Users/Mor Slomi/Desktop/???????/??? ?/data analysis with R/lab1/israel_crime_full_lab1" ) 
+lab1.map <- read.csv("C:/Users/Mor Slomi/Desktop/???????/??? ?/data analysis with R/lab1/lab1_map.csv", as.is = "town")
+
+```
+
+```{r}
+crimes.full.name <- "~/Dropbox (Personal)/School/52414/Lectures_2018/course_data/israeli_crime/israel_crime_full_lab1"
+lab1.map.name <- "~/Dropbox (Personal)/School/52414/Lectures_2018/course_data/israeli_crime/lab1_map.csv"
+crimes.full <- read.csv(crimes.full.name, stringsAsFactors = FALSE)
+lab1.map <- read.csv(lab1.map.name, stringsAsFactors = FALSE)
+```
+
+
+0. Due to some bamboozlement, `crimes.full` is missing the `town` column. Create a script that adds a `town` column to our data by pairing each `town_number` in `crimes.full` with its `town` counterpart using `lab1.map`. In addition, use the `r-base` function `join` (or merge) to achieve the same thing. Which one is faster? Why does it matter? Use the web to find out what is the difference between `right`,`left`,`inner`, and `anti` join. 
+Use the library `tictoc` and the methods `tic()` and `toc()` to time both processes.   
+
+*The tictoc package provides the very useful timing functions 'tic' and 'toc'. You can record the time it takes for R (and your computer) to process a simple or complex script before it is running using tic(), and examine the computation time at the end using toc().*
+
+    Solution:
+```{r}
+
+library(dplyr)
+library(ggplot2)
+library(tictoc)
+
+tic()
+ for(i in 1:nrow(crimes.full)){
+   for(j in 1:nrow(lab1.map)){
+       if(crimes.full$town_number[i] == lab1.map$town_number[j]){
+      crimes.full$town[i] <- lab1.map$town[i]
+    }
+  }
+}
+toc()
+
+tic()
+new.crimes.full <-  unique(merge(lab1.map,crimes.full, by ='town_number'))
+toc()
+
+```
+The second function is faster and therefore better than the first way. This is reflected when working on large data files where the calculation takes longer.
+
+
+1. Create a new variable - `total_assaults`, the sum of `assaults`,`robberies`, and `sexual_assault`. Also, calculate the `total_assaults_rate` per 10,000 people for each town, and add those variables to the table. Which town has the largest total_assaults in 2013? Which has the largest total_assault_rate in 2013?  
+
+    Solution:
+```{r}
+
+for(i in 1:nrow(crimes.full)){
+  crimes.full$total_assaults[i] <- sum(crimes.full$assaults[i],crimes.full$sexual_assault[i],crimes.full$robberies[i])
+}
+
+
+crimes.full.2013 <-  filter(crimes.full, crimes.full$year==2013)
+
+largest_total_assault_town_2013 <- crimes.full.2013$town[which.max(crimes.full.2013$total_assaults)]
+largest_total_assault_town_2013
+
+crimes.full$total_assaults_rate <- crimes.full$total_assaults*10000/crimes.full$population
+
+largest_total_assault_rate_town_2013 <- crimes.full.2013$town[which.max(crimes.full.2013$total_assaults_rate)]
+largest_total_assault_rate_town_2013
+
+```   
+The town with the largest total assaults in 2013 is JERUSALEM, while the town with the largest total assault rate in 2013 is ELAT.   
+
+
+2. Jerusalem is the city with the most total assaults. However, this does not necessarily make Jerusalem the most dangerous town (as you've seen above). Create a plot that shows the correlation between the number of total assaults to the towns' population. 
+  
+    Solution:
+```{r}
+
+plot(crimes.full$total_assaults,crimes.full$population, col = 'lightseagreen',
+     xlab = 'Total Assaults', ylab = 'Towns Population', main = 'Correlation between the number of Total Assaults to the Towns Population')
+
+```
+
+
+3. Describe graphically the distribution of the total assault rates across towns in 2013:  
+a. How similar are towns?   (show graphically and explain verbally)
+b. How much do total assault rates vary by region? (show graphically and explain verbally)
+  
+    Solution:
+```{r}
+
+total_assaults_rates_2013 <- crimes.full$total_assaults_rate[crimes.full$year == 2013]
+town_number_2013 <- crimes.full$town_number[crimes.full$year == 2013]
+town_name_2013 <- crimes.full$town[crimes.full$year == 2013]
+region_2013 <- crimes.full$region[crimes.full$year == 2013]
+
+#A.
+barplot(height =  total_assaults_rates_2013, col = 'cornflowerblue',  
+        xlab = 'Towns' , ylab = 'Total Assault Rate',
+        main = 'The Distribution of the Total Assault Rates across Towns in 2013')
+
+#B.
+
+crimes.region.2013 <- as.data.frame(cbind(region_2013,total_assaults_rates_2013))
+
+total_assaults_rates_region_2013 <- crimes.region.2013 %>%
+    group_by(region_2013) %>% summarise(total_assaults_rates_region_2013 = mean(total_assaults_rates_2013))
+
+
+barplot( height =  total_assaults_rates_region_2013$total_assaults_rates_region_2013, col = 'mistyrose',  
+        xlab = 'Region' , ylab = 'Total Assault Rate',
+        main = 'The Distribution of the Total Assault Rates across Region in 2013')
+
+
+```
+```{}
+a. A histogram is better to visualize the distribution of non aggregated. High level trends are difficult to read from your plot.
+b. Your code does not work, but also the use of barplot is incorrect. Here you were expected to use a boxplot - for visualizing aggregated distributions. See solutions. 
+```
+
+A. The results of the first graph indicate that the towns are not similar in thier total assault rates across towns in 2013.
+B. The results of the second graph indicate that the range of the total assault rate is relatively small, so it can be derived that there is a similarity between most of the region.
+
+4. Should your friend be worried coming over next year? Check the changes in the distribution of the total assault rates across towns over the years. Plot a histogram of the total assault rate across towns over the different years. Is there an increase in crime? Make sure to pick binwidths that result in informative plots.
+  
+    Solution:
+```{r}
+
+total_assaults_rates_2012 <- crimes.full$total_assaults_rate[crimes.full$year == 2012]
+town_number_2012 <- crimes.full$town_number[crimes.full$year == 2012]
+total_assaults_rates_2011 <- crimes.full$total_assaults_rate[crimes.full$year == 2011]
+town_number_2011 <- crimes.full$town_number[crimes.full$year == 2011]
+
+
+barplot( table(town_name_2013) ,height =  cbind(total_assaults_rates_2011 , total_assaults_rates_2012,total_assaults_rates_2013),
+        xlab = 'Towns', ylab = 'Total Assaults Rate', 
+        border = 'pink',main = 'Total Assault Rate Across Towns Over The Years', beside = TRUE)
+
+mean(total_assaults_rates_2011)
+mean(total_assaults_rates_2012)
+mean(total_assaults_rates_2013)
+
+```
+
+
+It can be seen that the average number of attacks in 2011-2013 is only slightly higher, so our friend has nothing to fear or worry about coming over next year.
+
+```{}
+Your plot is not very descriptive - again, it is better to use a histogram for frequencies when visualizing distributions. 
+```
+
+
+5. Another way to see the distributional change by year is via a heatmap plot. One problem with the plot above is that we can't distinguish towns from each other. We have three variables to show: year, town and rate. If we use the two dimensions to show year and town then we need something other than vertical or horizontal position to show the rates. Try using color. 
+To make the visualization easier, filter the data to include only towns with population >= 87000. 
+Use the following `ggplot1` blueprint to create the heatmap:
+```{}
+ggplot(aes(x = ?, y = ?,  fill = ?)) +
+    geom_tile(color = "grey50") +
+    scale_x_discrete(expand = c(0,0)) +
+    scale_fill_gradientn("Cases per\n10,000", 
+                         colors = brewer.pal(9, "Reds"))
+    theme_minimal() +  
+    theme(panel.grid = element_blank()) +
+    ggtitle("Total Assault Rate per 10,000 by Town") + 
+    ylab("") + xlab("")
+```
+    
+    Solution:
+```{r}
+library(RColorBrewer)
+crimes.greater.87000 <- filter(crimes.full, crimes.full$population >= 87000)
+
+ggplot(crimes.greater.87000, aes(x = crimes.greater.87000$year , y = crimes.greater.87000$town, 
+                                 fill = crimes.greater.87000$total_assaults_rate )) +
+  geom_tile(color = "grey50") +
+  scale_x_discrete(expand = c(0,0)) +
+  scale_fill_gradientn( "Cases per\n10,000", 
+                        colors = brewer.pal(9, 'Purples')) +
+  
+theme_minimal() +  
+  theme(panel.grid = element_blank()) +
+  ggtitle("Total Assault Rate per 10,000 by Town") + 
+  ylab("Town") + xlab("Year")
+
+
+```
+Unlike the graph in the previous question, this graph clearly shows that in most of the towns there was no increase in the total assault rate over the years 2011-2013 and in those who were, the increase was moderate and not drastic.
+
+
+
+6. Summarize your findings. Do you think it matters what town your friend should visit? Are there any towns you think they should skip? 
+
+    Solution:
+    
+    The crime rate in Israel is not particularly high, so we will recommend to our friend to visit Israel without fear.
+In addition, it can be seen that although in 2013 there were the highest number of assaults in Jerusalem, Eilat is the town with the highest assaults rate. Therefore, if he wants to avoid visiting certain towns, we recommend giving up cities such as Eilat and Tiberias, where crime rates are relatively high.
+    

@@ -1,0 +1,241 @@
+---
+title: "Lab 1 Solutions"
+author: '52414'
+date: "4/21/2018"
+output:
+  html_document: default
+  pdf_document: default
+---
+
+GROUP Number: **12**
+Name of 1st group member: **Yoel Fraenkel**
+Email of 1st group member: 	**Yoel.Fraenkel@mail.huji.ac.il**
+Name of 2st group member: **Adi Ziv**
+Email of 2st group member: **adi.ziv1@mail.huji.ac.il**
+
+Instructions:    
+1. Please rename your group lab_1 rmd file as - `Lab1_group#.rmd`.   
+** The # should be replaced by your group number.  
+2. Fill in your code in the relevant code execution boxes.  
+3. Please avoid plagiarism - do not share your answers with other groups.  
+4. Use the encryption guide (see moodle) to encrypt your final rmd file and name it `Lab1_group#_crypt`   
+5. Upload the encrypted file to the following link:  
+** `https://github.com/DataScienceHU/DataAnalysisR/tree/master/Lab1/Lab1_submission/``
+
+Required libraries:
+```{r, cache=FALSE, results="hide", warning=FALSE, comment=FALSE, warning=FALSE}
+library(dplyr)
+library(ggplot2)
+library(tictoc)
+library(ggthemes)
+library(ggpubr)
+library(ggrepel)
+library(RColorBrewer)
+library(ggpubr)
+```
+ 
+A friend wants to visit Israel, but heard things might be violent. 
+You want to inform him that Israel's streets are actually pretty safeâ¦ but - maybe there are some towns your friend shouldnât visit. 
+Fortunately, you have access to some data that with a bit of wrangling can help you and your friends make better informed decisions. 
+
+First, load the `israel_crime_full_lab1` and `lab1.map` datasets:  
+    
+    Solution:
+```{r}
+crimes.full <- read.csv("C:/Users/Alpha/Documents/university/yearc/simesterB/DataAnalysiswithR/labs/lab1/israel_crime_full_lab1") # load israel_crime_full_lab1 here
+lab1.map <-read.csv("C:/Users/Alpha/Documents/university/yearc/simesterB/DataAnalysiswithR/labs/lab1/lab1_map.csv") # load lab1.map here
+```
+
+
+0. Due to some bamboozlement, `crimes.full` is missing the `town` column. Create a script that adds a `town` column to our data by pairing each `town_number` in `crimes.full` with its `town` counterpart using `lab1.map`. In addition, use the `r-base` function `join` (or merge) to achieve the same thing. Which one is faster? Why does it matter? Use the web to find out what is the difference between `right`,`left`,`inner`, and `anti` join. 
+Use the library `tictoc` and the methods `tic()` and `toc()` to time both processes.   
+
+*The tictoc package provides the very useful timing functions 'tic' and 'toc'. You can record the time it takes for R (and your computer) to process a simple or complex script before it is running using tic(), and examine the computation time at the end using toc().*
+
+    Solution:
+    
+**Before starting, we would like to check the data. at first we will look at the data, and second i will check if the two variables that we want to compare are the same**
+
+```{r}
+head(crimes.full)#insted of: View(crimes.full)
+head(lab1.map)#insted of: View(lab1.map)
+nrow(lab1.map)==nrow(crimes.full)
+all(lab1.map$town_number==crimes.full$town_number)
+```
+**"GOOD! lets the game begain!"**
+```{r}
+# r-base
+tic()
+town<-rep(0,length.out=dim(crimes.full)[1])
+crimes.full<-data.frame(crimes.full[,1:2],town,crimes.full[,3:12])
+for(i in 1:dim(lab1.map)[1]){
+    for(j in 1:dim(crimes.full)[1]){
+      if(lab1.map$town_number[i]==crimes.full$town_number[j]){
+        crimes.full[j,3]<-as.character(lab1.map[i,1])
+    }
+  }
+}
+toc()
+#Join base
+tic()
+lab1.map<-unique(lab1.map)
+crimes.full <- left_join( x = crimes.full,y = lab1.map, by = "town_number",copy=F)
+toc()
+```
+**We can see the Join function is much faster then our r base function, The closer the function is to the language of the machine, the closer it is to the particular system on which it works and the processes are more fast.in large data sets it's can be more significant.**
+
+1. Create a new variable - `total_assaults`, the sum of `assaults`,`robberies`, and `sexual_assault`. Also, calculate the `total_assaults_rate` per 10,000 people for each town, and add those variables to the table. Which town has the largest total_assaults in 2013? Which has the largest total_assault_rate in 2013?  
+
+    Solution:
+```{r}
+total_assaults<-crimes.full$assaults+crimes.full$sexual_assault+crimes.full$robberies
+total_assaults_rate <- (total_assaults / crimes.full$population) * 10000 
+crimes.full<-data.frame(crimes.full,total_assaults,total_assaults_rate)
+crimes.full$town.x[which(crimes.full$total_assaults==max(crimes.full$total_assaults[crimes.full$year==2013]))]
+crimes.full$town.x[which(crimes.full$total_assaults_rate==max(crimes.full$total_assaults_rate[crimes.full$year==2013]))]
+```   
+**Maybe JERUSALEM has the largest total_assaults in 2013, but ELAT have largest total_assault_rate in 2013, which make her to be the most dangerous town!**
+
+2. Jerusalem is the city with the most total assaults. However, this does not necessarily make Jerusalem the most dangerous town (as you've seen above). Create a plot that shows the correlation between the number of total assaults to the towns' population. 
+  
+    Solution:
+```{r}
+
+ggplot(data = crimes.full,aes(x =population ,y=total_assaults ))+
+  geom_point(alpha=0.3)+
+  xlim(0,175000)+
+  ylim(0,1250)+
+  ggtitle("Number of total Assaults VS Towns' Population")+
+  ylab("Towns' Population")+
+  xlab("Number of total Assaults")+
+  geom_smooth(method = "lm", se = F,color="red")+
+  geom_label(aes(label = paste("correlation = ",as.character(round(digits = 2,x =  cor(crimes.full$total_assaults,crimes.full$population)),2)), y=c(1000), x=c(25000)))+
+  theme_economist()
+```
+
+
+3. Describe graphically the distribution of the total assault rates across towns in 2013:  
+a. How similar are towns?   (show graphically and explain verbally)
+b. How much do total assault rates vary by region? (show graphically and explain verbally)
+  
+    Solution:
+```{r}
+#a
+ggplot(data = subset(x = crimes.full,crimes.full$year==2013),aes(x =total_assaults_rate))+ 
+  geom_histogram(binwidth = 5,fill="chartreuse1", color="antiquewhite4")+
+  geom_area(stat = "bin",alpha=0.1,color="chocolate1",size=0.75)+
+  ggtitle("Distribution of the Total Assault Rates Across Towns in 2013")+
+  ylab("Frequent/Count of Total Assault Rates ")+
+  xlab("Total Assault Rates")+
+  geom_vline(xintercept = median(crimes.full$total_assaults_rate[crimes.full$year==2013]),color="cyan1",size=1)+
+  geom_label(aes(label = paste("median of total assault rates: ",as.character(round(digits = 2,x =  median(crimes.full$total_assaults_rate[crimes.full$year==2013])),2)), y=c(-1.5), x=c(50)))+
+  geom_label(aes(label = paste("mean=",as.character(round(digits = 2,x =  mean(crimes.full$total_assaults_rate[crimes.full$year==2013])),2)), y=c(20), x=c(125))) +
+  geom_label(aes(label = paste("sd=",as.character(round(digits = 2,x =  sd(crimes.full$total_assaults_rate[crimes.full$year==2013])),2)), y=c(17), x=c(125)))+
+  theme_solarized(light = FALSE)
+  
+summary(crimes.full$total_assaults_rate[crimes.full$year==2013])
+boxplot(crimes.full$total_assaults_rate[crimes.full$year==2013], main="Boxplot of Total Assaults Rate in 2013")
+```
+
+**a :**
+**We can see that most of our data (50%) is between 27 to 57, the avrage is 45.3 and the SD is 25. the grafs the summary and the SD inform us that the our towns are pretty centralized with long rigth tail. the boxplot inform us that the most under line is the minimom and is about 2.314. in the box we can see the 1st Qu.(27.943), median( 42.690), and 3rd Qu( 57.325). . after this the upper line is 1.5 size of the box. **
+```{r}
+#b
+population_by_region<-aggregate(crimes.full$population[crimes.full$year==2013],by=list(crimes.full$region[crimes.full$year==2013]),FUN=sum)
+assault_rates_by_region<-aggregate(crimes.full$total_assaults_rate[crimes.full$year==2013],by=list(crimes.full$region[crimes.full$year==2013]),FUN=sum)
+crimes.region<-data.frame(population_by_region,assault_rates_by_region[,2])
+names(crimes.region)<-c("region","population","totale_assaults_rates")
+
+ggplot(data = crimes.region,aes(x = region,y =totale_assaults_rates, fill= population))+
+  geom_bar(stat = "identity")+
+  ggtitle("Total Assault Rates by Region in 2013")+
+  ylab("Total Assault Rates")+
+  xlab("Regions")+
+  theme(text = element_text(size=15),axis.text.x = element_text(angle=90, hjust=0.01))
+
+summary(assault_rates_by_region$x)
+boxplot(assault_rates_by_region$x,main="Boxplot of Total Assault Rates by Region in 2013")
+```
+
+**b :**
+**If we take a look on total assault rates by region and on the boxplot  of this data  the total assault rates by region is pretty centralized with long rigth tail.the boxplot inform us that the most under line is the minimom and is about 24.5. in the box we can see the 1st Qu.(156.3), median( 343.11), and 3rd Qu.(567.27) . after this the upper line is 1.5 size of the box and after this we can see outliers like AKKO and BERR SHEVA. in addition we can see we have some regions that have large rates like AKKO,ASHKELON,BERR SHEVA, and we have some whith very small rates like BET LEHEM, GOLAN, HADERA, and SHCEM. but also we can see that most places with small crime rate hava also small population. interesting to see in this plot how much JERUSALEM & TEL AVIV regions are safe! **
+
+
+4. Should your friend be worried coming over next year? Check the changes in the distribution of the total assault rates across towns over the years. Plot a histogram of the total assault rate across towns over the different years. Is there an increase in crime? Make sure to pick binwidths that result in informative plots.
+  
+    Solution:
+```{r}
+total_assaults_rate_2011_2013<-ggplot(data = crimes.full,aes(total_assaults_rate,fill=factor(year),group=factor(year)))+
+  geom_density(alpha=0.6)+
+  ggtitle("Distribution of the Total Assault Rates Across Towns \n by the years 2011-2013")+
+  ylab("Frequent of Total \n Assault Rates ")+
+  xlab("Total Assault Rates")+
+  geom_vline(xintercept = mean(crimes.full$total_assaults_rate[crimes.full$year==2011]),col="red")+
+  geom_vline(xintercept = mean(crimes.full$total_assaults_rate[crimes.full$year==2012]),col="green")+
+  geom_vline(xintercept = mean(crimes.full$total_assaults_rate[crimes.full$year==2013]),col="blue")+
+  theme_solarized(light = FALSE)
+
+total_assaults_rate_2011<-ggplot(data = subset(x = crimes.full,crimes.full$year==2011),aes(x =total_assaults_rate))+ 
+  geom_histogram(binwidth = 5,fill="lightcoral", color="honeydew",alpha=0.5)+
+  ggtitle("Distribution of the Total Assault \n Rates Across Towns in 2011")+
+  ylab("Count of Total \n Assault Rates ")+
+  xlab("Total Assault Rates")+
+  geom_vline(xintercept = mean(crimes.full$total_assaults_rate[crimes.full$year==2011]),col="red")+
+  theme_solarized(light = FALSE)
+
+total_assaults_rate_2012<-ggplot(data = subset(x = crimes.full,crimes.full$year==2012),aes(x =total_assaults_rate))+ 
+  geom_histogram(binwidth = 5,fill="lightgreen", color="honeydew",alpha=0.5)+
+  ggtitle("Distribution of the Total Assault \n Rates Across Towns in 2012")+
+  ylab("Count of Total\n Assault Rates ")+
+  xlab("Total Assault Rates")+
+  geom_vline(xintercept = mean(crimes.full$total_assaults_rate[crimes.full$year==2012]),col="green")+
+  theme_solarized(light = FALSE)
+
+total_assaults_rate_2013<-ggplot(data = subset(x = crimes.full,crimes.full$year==2013),aes(x =total_assaults_rate))+ 
+  geom_histogram(binwidth = 5,fill="lightskyblue", color="honeydew",alpha=0.5)+
+  ggtitle("Distribution of the Total Assault \n Rates Across Towns in 2013")+
+  ylab("Count of Total \n Assault Rates ")+
+  xlab("Total Assault Rates")+
+  geom_vline(xintercept = mean(crimes.full$total_assaults_rate[crimes.full$year==2013]),col="blue")+
+  theme_solarized(light = FALSE)
+
+ggarrange(total_assaults_rate_2011_2013,total_assaults_rate_2011,total_assaults_rate_2012,total_assaults_rate_2013)
+```
+
+
+**We can see there is no big change in crime over time, and so defently we recomend our friend coming over next year**
+
+5. Another way to see the distributional change by year is via a heatmap plot. One problem with the plot above is that we can't distinguish towns from each other. We have three variables to show: year, town and rate. If we use the two dimensions to show year and town then we need something other than vertical or horizontal position to show the rates. Try using color. 
+To make the visualization easier, filter the data to include only towns with population >= 87000. 
+Use the following `ggplot1` blueprint to create the heatmap:
+```{}
+ggplot(aes(x = ?, y = ?,  fill = ?)) +
+    geom_tile(color = "grey50") +
+    scale_x_discrete(expand = c(0,0)) +
+    scale_fill_gradientn("Cases per\n10,000", 
+                         colors = brewer.pal(9, "Reds"))+
+    theme_minimal() +  
+    theme(panel.grid = element_blank()) +
+    ggtitle("Total Assault Rate per 10,000 by Town") + 
+    ylab("") + xlab("")
+```
+    
+    Solution:
+```{r}
+ggplot(subset(crimes.full,population >= 87000),aes(x = year, y = town.x,  fill = total_assaults_rate)) +
+    geom_tile(color = "grey50") +
+    scale_fill_gradientn("Cases per\n10,000", 
+                         colors = brewer.pal(9, "Reds"))+
+    theme_minimal() +  
+    theme(panel.grid = element_blank()) +
+    ggtitle("Total Assault Rate per 10,000 by Town") + 
+    ylab("Town") + xlab("Year")
+
+```
+
+
+6. Summarize your findings. Do you think it matters what town your friend should visit? Are there any towns you think they should skip? 
+
+    Solution:
+
+**We find that if we look at total_assaults so JERUSALEM is the most dangerous town in 2013, but To be honest ELAT is the most dangerous town, because she has the largest total_assault_rate. Additionally, we find there is a good correlation between the number of total casualties to the towns' population. but still we find that towns' and regions are have no big different in thier total assaults rate, but they have long right tail. also it was nice to see that we have a no increase in crime over time, and we recomend our friend coming over next year and visit in JERUSALEM and HERZELIYYA but skip ELAT and BE'ER SHEVA. in the safest cities like BENE BERAQ and MODI'IN MAKKABBIM REOUT he would probably die of boredom. **

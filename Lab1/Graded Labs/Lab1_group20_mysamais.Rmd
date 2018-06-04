@@ -1,0 +1,184 @@
+---
+title: "Lab 1 Solutions"
+author: '52414'
+date: "4/21/2018"
+output: html_document
+---
+
+GROUP Number:_yy_______
+Name of 1st group member: ____mysaa____
+Email of 1st group member: ____mysaa.jbaly@mail.huji.ac.il____
+Name of 2st group member: ____mais____
+Email of 2st group member: ____mais.hejyehia@mail.huji.ac.il____
+
+Instructions:    
+1. Please rename your group lab_1 rmd file as - `Lab1_group#.rmd`.   
+** The # should be replaced by your group number.  
+2. Fill in your code in the relevant code execution boxes.  
+3. Please avoid plagiarism - do not share your answers with other groups.  
+4. Use the encryption guide (see moodle) to encrypt your final rmd file and name it `Lab1_group#_crypt`   
+5. Upload the encrypted file to the following link:  
+** `https://github.com/DataScienceHU/DataAnalysisR/tree/master/Lab1/Lab1_submission/``
+
+Required libraries:
+```{r, echo=FALSE}
+library(dplyr)
+library(ggplot2)
+library(tictoc)
+```
+ 
+A friend wants to visit Israel, but heard things might be violent. 
+You want to inform him that Israel's streets are actually pretty safe… but - maybe there are some towns your friend shouldn’t visit. 
+Fortunately, you have access to some data that with a bit of wrangling can help you and your friends make better informed decisions. 
+
+First, load the `israel_crime_full_lab1` and `lab1.map` datasets:  
+    
+    Solution:
+```{}
+# Your code here
+# Load datasets here
+crimes.full <-read.csv("C:/Users/Windows10/Desktop/R/israel_crime_full_lab1.csv")
+lab1.map <- read.csv("C:/Users/Windows10/Desktop/R/lab1_map (1).csv")
+```
+
+```{r}
+# Your code here
+# Load datasets here
+crimes.full.name <- "~/Dropbox (Personal)/School/52414/Lectures_2018/course_data/israeli_crime/israel_crime_full_lab1"
+lab1.map.name <- "~/Dropbox (Personal)/School/52414/Lectures_2018/course_data/israeli_crime/lab1_map.csv"
+crimes.full <- read.csv(crimes.full.name, stringsAsFactors = FALSE)
+lab1.map <- read.csv(lab1.map.name, stringsAsFactors = FALSE)
+  
+```
+
+```{r}
+new.column <- left_join(crimes.full,lab1.map,by="town_number")
+```
+
+
+0. Due to some bamboozlement, `crimes.full` is missing the `town` column. Create a script that adds a `town` column to our data by pairing each `town_number` in `crimes.full` with its `town` counterpart using `lab1.map`. In addition, use the `r-base` function `join` (or merge) to achieve the same thing. Which one is faster? Why does it matter? Use the web to find out what is the difference between `right`,`left`,`inner`, and `anti` join. 
+Use the library `tictoc` and the methods `tic()` and `toc()` to time both processes.   
+
+*The tictoc package provides the very useful timing functions 'tic' and 'toc'. You can record the time it takes for R (and your computer) to process a simple or complex script before it is running using tic(), and examine the computation time at the end using toc().*
+
+    Solution:
+```{r}
+tic()
+mynew<-right_join(crimes.full,lab1.map,by="town_number")
+toc()
+
+tic()
+crimes.full.length=length(crimes.full$town_number)
+lab1.map.length=length(lab1.map$town_number)
+if (crimes.full.length==lab1.map.length){
+crime.full.s<-crimes.full[order(crimes.full$town_number),]
+lab1.map.s<-lab1.map[order(lab1.map$town_number),]
+the.town<- lab1.map.s$town
+answerA<- cbind(crime.full.s, the.town )
+answerA
+}   else   { print("na")
+  }
+
+toc()
+```
+
+
+1. Create a new variable - `total_assaults`, the sum of `assaults`,`robberies`, and `sexual_assault`. Also, calculate the `total_assaults_rate` per 10,000 people for each town, and add those variables to the table. Which town has the largest total_assaults in 2013? Which has the largest total_assault_rate in 2013?  
+
+    Solution:
+```{r}
+robberies<- answerA$robberies
+assaults<- answerA$assaults
+sexual.assault<- answer1$sexual_assault
+total.assaults<- sum(assaults,robberies,sexual.assault)
+
+answer1
+
+in2013<- answer1[answer1[,"year"]==2013,]
+
+
+crimesratein2013<- (in2013$assaults + in2013$robberies + in2013$sexual_assault) / (in2013$population / 10000)
+
+total.crime2013<- (in2013$assaults + in2013$robberies + in2013$sexual_assault) 
+
+total.crime2013
+crimesratein2013
+
+
+answerB<- cbind(in2013,crimesratein2013,total.crime2013)
+answerB
+
+
+answerB$the.town[which.max(crimesratein2013)]
+answerB$the.town[which.max(total.crime2013)]
+
+```   
+
+
+2. Jerusalem is the city with the most total assaults. However, this does not necessarily make Jerusalem the most dangerous town (as you've seen above). Create a plot that shows the correlation between the number of total assaults to the towns' population. 
+  
+    Solution:
+```{r}
+plot(answerB$population,answerB$total.crime2013)
+
+```
+
+
+3. Describe graphically the distribution of the total assault rates across towns in 2013:  
+a. How similar are towns?   (show graphically and explain verbally)
+b. How much do total assault rates vary by region? (show graphically and explain verbally)
+  
+    Solution:
+```{r}
+MCR <- max(crimesratein2013)
+plot(answerB$town_number ,((answerB$crimesratein2013/MCR)))
+```
+
+
+4. Should your friend be worried coming over next year? Check the changes in the distribution of the total assault rates across towns over the years. Plot a histogram of the total assault rate across towns over the different years. Is there an increase in crime? Make sure to pick binwidths that result in informative plots.
+  
+    Solution:
+```{r}
+# Your code here
+```
+
+
+5. Another way to see the distributional change by year is via a heatmap plot. One problem with the plot above is that we can't distinguish towns from each other. We have three variables to show: year, town and rate. If we use the two dimensions to show year and town then we need something other than vertical or horizontal position to show the rates. Try using color. 
+To make the visualization easier, filter the data to include only towns with population >= 87000. 
+Use the following `ggplot1` blueprint to create the heatmap:
+```{}
+ggplot(aes(x = ?, y = ?,  fill = ?)) +
+    geom_tile(color = "grey50") +
+    scale_x_discrete(expand = c(0,0)) +
+    scale_fill_gradientn("Cases per\n10,000", 
+                         colors = brewer.pal(9, "Reds"))
+    theme_minimal() +  
+    theme(panel.grid = element_blank()) +
+    ggtitle("Total Assault Rate per 10,000 by Town") + 
+    ylab("") + xlab("")
+```
+    
+    Solution:
+```{r}
+# Your code here
+``
+library(RcolorBrewer)
+Greater87000 <- filter(crimes.full ,crimes.full$population >= 87000)
+
+ggplot(Greater87000 , aes(x = Greater87000$year , y=Greater87000$town, fill = Greater87000$total.assaults)) +
+   geom_tile(color = "grey50") +
+    scale_x_discrete(expand = c(0,0)) +
+    scale_fill_gradientn("Cases per\n10,000", 
+                         colors = brewer.pal(9, "Reds"))
+    theme_minimal() +  
+    theme(panel.grid = element_blank()) +
+    ggtitle("Total Assault Rate per 10,000 by Town") + 
+    ylab("Town") + xlab("Year")
+
+6. Summarize your findings. Do you think it matters what town your friend should visit? Are there any towns you think they should skip? 
+
+    Solution:
+# You answer here 
+  according to the statistics and the graph describing town number and the crimes rate in specific  towns at 2013 it does  matter a lot which town he chooses to visit as there are  distinguisable varities in term of crime rates in different towns across israel.
+some of the  towns i would reccomend for him to visit : Golan and Haifa  
+however i dont reccomend him going to these cities due to their relatively high crimes rate :eilat and petah tekva 
