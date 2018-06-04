@@ -1,0 +1,153 @@
+---
+title: "Lab 2"
+date: "Due 06/6/2018"
+output: html_document
+editor_options: 
+chunk_output_type: inline
+---
+
+GROUP Number: ____fill-in____  
+Name of 1st group member: ____fill-in____  
+Email of 1st group member: ____fill-in____  
+Name of 2st group member: ____fill-in___ 
+Email of 2st group member: ____fill-in____
+
+**Instructions:**   
+1. Please rename your group lab_2 rmd file as - `Lab2_group#.rmd`.   
+** The # should be replaced by your group number.  
+2. Fill in your code in the relevant code execution boxes.  
+3. Please avoid plagiarism - do not share your answers with other groups.  
+4. Use the encryption guide (see moodle) to encrypt your final rmd file and name it `Lab2_group#_crypt`   
+5. Upload the encrypted file to the following link:  
+** `https://github.com/DataScienceHU/DataAnalysisR/tree/master/Lab2/Lab2_submission/`
+
+# Lab 2
+
+Vaccines have helped save millions of lives. In the 19th century, before herd immunization was achieved through vaccination programs, deaths from infectious diseases, like smallpox and polio, were common. However, today, despite all the scientific evidence for their importance, vaccination programs have become somewhat controversial.
+
+The controversy started with a [paper](http://www.thelancet.com/journals/lancet/article/PIIS0140-6736(97)11096-0/abstract) published in 1988 and lead by [Andrew Wakefield](https://en.wikipedia.org/wiki/Andrew_Wakefield) claiming there was a link between the administration of the measles, mumps and rubella (MMR) vaccine, and the appearance of autism and bowel disease. Despite much science contradicting this finding, sensationalists media reports and fear mongering from conspiracy theorists, led parts of the public to believe that vaccines were harmful. Some parents stopped vaccinating their children. This dangerous practice can be potentially disastrous given that the Center for Disease Control (CDC) estimates that vaccinations will prevent more than 21 million hospitalizations and 732,000 deaths among children born in the last 20 years (see [Benefits from Immunization during the Vaccines for Children Program Era — United States, 1994-2013, MMWR](https://www.cdc.gov/mmwr/preview/mmwrhtml/mm6316a4.htm)). 
+
+Effective communication of data is a strong antidote to misinformation and fear mongering. In this homework you are going to prepare a report to have ready in case you need to help a family member, friend or acquaintance that is not aware of the positive impact vaccines have had for public health.
+
+The data used for these plots were collected, organized and distributed by the [Tycho Project](http://www.tycho.pitt.edu/). They include weekly reported counts data for seven diseases from 1928 to 2011, from all fifty states.
+
+
+```{r, required libraries, include=FALSE}
+library(ggplot2)
+library(tidyverse)
+library(RColorBrewer)
+```
+
+## Part 1
+
+0. Load the `diseases` data from Moodle or Github  
+
+    **Solution:** 
+```{r, load data}
+
+#us_contagious_diseases <- #YOUR CODE HERE
+```
+
+
+1. Use the `us_contagious_disease` and `dplyr` tools to create a data.frame called `dat` that stores only the Measles data (with all the other features). Please add  a per 100,000 people rate, and remove Alaska and Hawaii from the data since they only became states in the late 50s. Note that there is a `weeks_reporting` column. Take that into account when computing the rate.  
+
+    **Solution:** 
+```{r}
+
+```
+
+2. Plot the Measles disease rates per year for California. Find out when the Measles vaccine was introduced and add a vertical line to the plot to show this year.  
+
+    **Solution:** 
+```{r}
+
+```
+
+
+3. Does the pattern hold for other states? Use boxplots to get an idea of the distribution of rates for each year, and see if the pattern holds across states.  
+a. Generate the plot with scale_y_continuous
+b. Generate the same plot but now with scale_y_sqrt (breaks = seq(0, 100, 4)^2))  
+Which one is better and why?
+
+    **Solution:**   
+    
+```{r}
+
+```
+
+
+4. One problem with the boxplot is that it does not let us see state-specific trends.  Plot the Measles disease rates per year for all states. Find out when the Measles vaccine was introduced and add a vertical line to the plot to show this year. Add the US average to the plot. Hint: Note there are missing values in the data.  
+
+    **Solution:**  
+   
+```{r}
+
+
+
+```
+
+## Part 2
+
+Here we'll start analyzing the results we collected in class regarding the display of visual information. 
+
+5. Download and import the "Cleveland Experiment.csv" and "correct.Rdata" files from moodle. 
+
+```{r}
+#experiment.data <- #YOUR CODE HERE
+#load(correct)
+```
+
+
+6. Look at the distribution of guesses of Question 2 of the experiment.  
+a. Compare the correct difference vs the reported (experiment data)
+b. Compare it to a normal distribution with a histogram and with the qq-plot.  
+c. Compare to the normal distribution using a density plot. 
+d. Would you approximate this distribution using the normal? 
+
+    Solution:
+
+```{r}
+
+```
+
+```{r}
+
+```
+
+```{r}
+
+
+```
+
+```{r}
+
+```
+
+```{r}
+
+```
+
+7. Perform the same analysis (all the above) for question 5 of the experiment.  
+How are the two compare?  
+
+    Solution:
+
+```{r}
+
+```
+
+8. In one figure graph the boxplots for each experiment question. Hint - use the base R function `stack`. 
+a. Do you think the output figure is satisfying in terms of explaining the data? 
+b. Use scale_y_continuous to trim some of the outliers to make the figure more readable. In addition, add a line to each boxplot to symbolize the `true` mean.  Hint - one way of adding the true lines is by adding another set of boxplots with zero variation centered around `correct`.  
+
+    Solutions:
+```{r}
+
+```
+
+```{r}
+
+```
+
+
+
